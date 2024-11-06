@@ -1,0 +1,37 @@
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: workflow
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    steps:
+      - name: Say hello
+        uses: docker://golang:1.20.3-alpine3.17
+        shell: sh
+        run: |
+          echo "hello world"
+  sync:
+    steps:
+      - uses: docker://golang:1.20.3-alpine3.17
+        name: Say hello
+        shell: sh
+        run: |
+          echo "hello world"
+      - uses: cloudbees-io/configure-git-global-credentials@v1
+        name: Git global credentials
+        with:
+          token: ${{ cloudbees.scm.token }}
+      - uses: docker://alpine/git:v2.45.2
+        name: Say hello
+        shell: sh
+        run: |
+          set -x
+          echo "Running git commands"
+          git config --global user.email "swashburn@cloudbees.com"
+          git config --global user.name "Spike Washburn (ci-bot)"
+          git clone git@github.com:swashbuck1r/jenkins
+          cd jenkins
+          git remote add upstream https://github.com/jenkinsci/jenkins.git
+          git fetch upstream
+          git merge e9f8cd64ddfc63558fe247dcb1fec72656549485
